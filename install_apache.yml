@@ -1,0 +1,14 @@
+---
+- name: Install Apache
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install Apache via shell
+      ansible.builtin.shell: sudo apt install apache2 -y
+      register: apache_install
+      changed_when: "'apache2 is already the newest' not in apache_install.stdout"
+      failed_when: apache_install.rc != 0
+
+    - name: Foute taak (om 'failed' te tonen)
+      ansible.builtin.command: /bin/false
+      ignore_errors: no
