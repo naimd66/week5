@@ -1,0 +1,21 @@
+name: Ansible Apache Install CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  install-apache:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Run playbook
+        run: ansible-playbook install_apache.yml
