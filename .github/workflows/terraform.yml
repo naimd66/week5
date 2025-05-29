@@ -1,0 +1,20 @@
+name: Terraform Plan & Apply
+
+on:
+  push:
+    paths:
+      - '**.tf'
+
+jobs:
+  validate-terraform:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Terraform init
+        run: terraform init
+      - name: Terraform format check
+        run: terraform fmt -check
+      - name: Terraform validate
+        run: terraform validate
+      - name: Terraform plan
+        run: terraform plan
