@@ -1,0 +1,21 @@
+name: Run Ansible playbook on push
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  run-playbook:
+    runs-on: self-hosted  # Dit gebruikt jouw eigen runner
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Run Ansible playbook
+        run: |
+          ansible-playbook -i inventory.ini opdracht1.yml
