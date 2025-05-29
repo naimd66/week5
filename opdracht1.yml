@@ -1,0 +1,19 @@
+---
+- name: Apache handmatig installeren met error test
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install Apache via raw command (zonder apt module)
+      raw: |
+        sudo apt update && sudo apt install apache2 -y
+      register: apache_install
+      changed_when: "'newly installed' in apache_install.stdout"
+
+    - name: Toon resultaat van installatie
+      debug:
+        var: apache_install.stdout
+
+    - name: Opzettelijke fout maken (bestand bestaat niet)
+      command: /bin/doesnotexist
+      ignore_errors: false
