@@ -1,0 +1,17 @@
+name: Run Ansible playbook
+
+on:
+  push:
+    paths:
+      - '**.yml'
+      - '**.ini'
+
+jobs:
+  ansible:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run playbook
+        run: ansible-playbook -i inventory.ini opdracht1.yml
