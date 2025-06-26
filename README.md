@@ -1,116 +1,81 @@
 # week5
 
-# Week 5 – Infrastructure as Code: CI/CD
+# Infrastructure as Code – Week 5
 
-**Student:** naimd66  
-**Datum:** 2025-05-29  
-**Onderwerp:** Gebruik van AI tijdens practicumweek 5
+## Inhoud
 
----
-
-## 📌 Instructie
-In deze markdown worden alle AI-prompts en bijbehorende antwoorden opgenomen die gebruikt zijn bij de uitvoering van de opdrachten uit **week 5** van het vak Infrastructure as Code. Dit dient als bewijs voor het gebruik van AI volgens de beoordelingscriteria.
+Deze repository bevat de opdracht voor week 5 van het vak *Infrastructure as Code*. De focus ligt op het opzetten van een CI/CD-pipeline via GitHub Actions voor zowel Terraform- als Ansible-scripts.
 
 ---
 
-## 🔧 Opdracht 1: Ansible zonder apt-module
+## Bestanden & Structuur
 
-**Prompt:**
-> Maak een playbook waarbij het pakket apache2 wordt geinstalleerd, maar niet via de apt module. En er moet een ‘Changed’ melding komen als het installeren gelukt is. Zorg er ook voor dat het in een andere taak fout gaat en Ansible netjes laat zien dat het fout gegaan is.
-
-**AI-antwoord (samenvatting):**
-Er werd een Ansible-playbook gemaakt met de `command` module om Apache te installeren:
-```yaml
-- name: Install Apache without using apt module
-  command: "apt install -y apache2"
-  register: apache_output
-  changed_when: "'is already the newest version' not in apache_output.stdout"
-```
-Daarna werd een foutieve taak toegevoegd met een `fail` module:
-```yaml
-- name: Force failure for testing
-  fail:
-    msg: "Dit is een opzettelijke fout voor demonstratie."
-```
+| Bestand/folder              | Beschrijving                                                |
+|-----------------------------|-------------------------------------------------------------|
+| `main.tf`                   | Terraform-configuratie voor Azure resource deployment       |
+| `inventory.ini`             | Ansible-inventory met IP’s en hostgroepen                   |
+| `install_apache.yml`        | Eenvoudig Ansible-playbook voor Apache-installatie          |
+| `opdracht1.yml`             | Ansible-playbook met conditionele logica en output testing  |
+| `.github/workflows/*.yml`   | GitHub Actions workflows voor CI/CD                         |
+| `ci.yml`                    | Alternatief CI-configuratiebestand (niet actief gebruikt)   |
+| `Schermafbeeldingen *.png` | Bewijs van succesvolle CI/CD-runs                           |
 
 ---
 
-## 🤖 Opdracht 2: GitHub Runner & Ansible CI/CD
+## CI/CD Workflows
 
-**Prompt:**
-> Installeer een lokale GitHub Runner en voeg deze toe aan je repository...
+De folder `.github/workflows/` bevat de volgende pipelines:
 
-**AI-antwoord (samenvatting):**
-Stap-voor-stap werd uitgelegd hoe een GitHub self-hosted runner wordt toegevoegd:
-1. `mkdir actions-runner && cd actions-runner`
-2. Download + extract runner tarball
-3. Configureren met `./config.sh --url https://github.com/naimd66/week5 --token <TOKEN>`
-4. Start met `./run.sh`
+| Workflow-bestand            | Functie                                                     |
+|-----------------------------|-------------------------------------------------------------|
+| `terraform.yml`             | Voert automatisch `terraform plan` en `apply` uit bij push |
+| `terraform-destroy.yml`     | Handmatige workflow om infrastructuur te vernietigen       |
+| `ansible-ci.yml`            | Test Ansible-playbooks bij elke push naar main             |
+| `ansible-runner.yml`        | Draait effectief Ansible-configuraties op remote servers    |
 
-Daarna werd een workflow bestand aangemaakt:
-```yaml
-# .github/workflows/ansible-ci.yml
-name: Run Ansible playbook on push
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  run-ansible:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run Ansible Playbook
-        run: ansible-playbook -i inventory.ini opdracht1.yml
-```
+De workflows worden automatisch geactiveerd bij een `push` of via handmatige triggers in GitHub Actions.
 
 ---
 
-## 🌍 Opdracht 3: Terraform + CI/CD
+## Terraform Deployment
 
-**Prompt:**
-> Maak een terraform manifest waarbij je een simpele vm deployed...
+Terraform wordt gebruikt voor het deployen van een infrastructuurcomponent in Azure (zoals een VM of netwerkresource).
 
-**AI-antwoord (samenvatting):**
-Een `main.tf` werd gemaakt met:
-- `provider "azurerm"` config
-- Een `azurerm_linux_virtual_machine` resource
-- SSH-key en image configuratie
-- `terraform.tfvars` en `variables.tf` toegevoegd
+### Uitvoeren lokaal:
 
-CI/CD workflow:
-```yaml
-# .github/workflows/terraform.yml
-name: Terraform Plan & Apply
+terraform init
+terraform plan
+terraform apply -auto-approve
 
-on:
-  push:
-    paths:
-      - 'terraform/**.tf'
+Ansible Playbooks
+install_apache.yml
+Installeert Apache op de opgegeven webserver(s).
 
-jobs:
-  terraform:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v3
-      - name: Init
-        run: terraform init
-      - name: Validate
-        run: terraform validate
-      - name: Plan
-        run: terraform plan -var-file="terraform.tfvars"
-```
+ansible-playbook -i inventory.ini install_apache.yml
+opdracht1.yml
+Complexer playbook dat conditioneel uitvoert en feedback geeft via statusmeldingen (changed, failed).
 
----
+ansible-playbook -i inventory.ini opdracht1.yml
 
-## ✅ Beoordelingsdoel: Bewijs AI-gebruik
+Inventory
+Voorbeeld uit inventory.ini:
 
-Alle opdrachten zijn ondersteund door AI-prompts. Taken zijn uitgevoerd via eigen Ubuntu VM met een lokale GitHub runner en automatische workflow-executie via GitHub Actions.
+[webservers]
+192.168.1.101
 
-Logs, commits en actie-uitvoeringen zijn zichtbaar in de Actions-tab van:  
-🔗 https://github.com/naimd66/week5/actions
+[dbservers]
+192.168.1.102
+Zorg ervoor dat de juiste SSH-sleutels zijn toegevoegd aan je lokale machine of GitHub Runner.
 
----
+Resultaten
+- CI/CD via GitHub Actions werkt automatisch en handmatig
+- Zowel Terraform als Ansible workflows zijn actief getest
+- Screenshots als bewijs toegevoegd
+- Roles en playbooks gestructureerd
+- README bevat uitvoerbare instructies en volledige uitleg
 
-**Einde verslag.**  
+Extra Tips
+- Gebruik terraform destroy alleen via de veilige workflow terraform-destroy.yml
+- Ansible-playbooks kunnen worden uitgebreid met roles en vars
+- Let op permissies van je SSH key bij self-hosted runners
+
